@@ -96,7 +96,8 @@ void Engine::Run()
 	{
 		const auto start = std::chrono::system_clock::now();
 		const auto dt = std::chrono::duration_cast<seconds>(start - clock);
-		clock = start;
+		deltaTime_ = dt.count();
+	    clock = start;
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
@@ -115,7 +116,15 @@ void Engine::Run()
 			}
 			program_.OnEvent(event);
 		}
+	    // Start the Dear ImGui frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplSDL2_NewFrame(window_);
+		ImGui::NewFrame();
+		DrawImGui();
+		ImGui::Render();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		program_.Update(dt);
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		SDL_GL_SwapWindow(window_);
 	}
 
@@ -132,5 +141,13 @@ void Engine::Destroy()
 	// Destroy our window
 	SDL_DestroyWindow(window_);
 	SDL_Quit();
+}
+
+void Engine::DrawImGui()
+{
+	ImGui::Begin("Engine");
+	ImGui::Text("FPS: %f", 1.0f / deltaTime_);
+	ImGui::End();
+	program_.DrawImGui();
 }
 }
