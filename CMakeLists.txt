@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.16)
+cmake_minimum_required (VERSION 3.14)
 project(GPR5300)
 
 
@@ -12,16 +12,6 @@ find_package(imgui CONFIG REQUIRED)
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 find_package(glad CONFIG REQUIRED)
-
-if(MSVC)
-	if (${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "AMD64")
-		set(GLSL_VALIDATOR "$ENV{VULKAN_SDK}/Bin/glslangValidator.exe")
-	else()
-		set(GLSL_VALIDATOR "$ENV{VULKAN_SDK}/Bin32/glslangValidator.exe")
-	endif()
-elseif(UNIX)
-	set(GLSL_VALIDATOR "glslangValidator")
-endif()
 
 file(GLOB_RECURSE GLSL_SOURCE_FILES
 		"data/*.frag"

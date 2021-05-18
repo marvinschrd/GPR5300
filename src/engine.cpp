@@ -6,8 +6,8 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl.h"
 
-namespace gl
-{
+namespace gl {
+
 Engine::Engine(Program& program) : program_(program)
 {
 }
@@ -15,15 +15,9 @@ Engine::Engine(Program& program) : program_(program)
 void Engine::Init()
 {
 	SDL_Init(SDL_INIT_VIDEO);
-#ifdef WIN32
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
-#else
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-#endif
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
@@ -49,8 +43,7 @@ void Engine::Init()
 		SDL_WINDOWPOS_UNDEFINED,
 		windowSize_.x,
 		windowSize_.y,
-		flags
-	);
+		flags);
 
 	// Check that everything worked out okay
 	if (window_ == nullptr)
@@ -88,47 +81,54 @@ void Engine::Init()
 
 void Engine::Run()
 {
-	Init();
-	bool isOpen = true;
-	std::chrono::time_point<std::chrono::system_clock> clock =
-		std::chrono::system_clock::now();
-	while (isOpen)
+	try 
 	{
-		const auto start = std::chrono::system_clock::now();
-		const auto dt = std::chrono::duration_cast<seconds>(start - clock);
-		deltaTime_ = dt.count();
-	    clock = start;
-		SDL_Event event;
-		while (SDL_PollEvent(&event))
+		Init();
+		bool isOpen = true;
+		std::chrono::time_point<std::chrono::system_clock> clock =
+			std::chrono::system_clock::now();
+		while (isOpen)
 		{
-			ImGui_ImplSDL2_ProcessEvent(&event);
-			if (event.type == SDL_QUIT)
+			const auto start = std::chrono::system_clock::now();
+			const auto dt = std::chrono::duration_cast<seconds>(start - clock);
+			deltaTime_ = dt.count();
+			clock = start;
+			SDL_Event event;
+			while (SDL_PollEvent(&event))
 			{
-				isOpen = false;
-			}
-
-			if (event.type == SDL_WINDOWEVENT)
-			{
-				if (event.window.event == SDL_WINDOWEVENT_RESIZED)
+				ImGui_ImplSDL2_ProcessEvent(&event);
+				if (event.type == SDL_QUIT)
 				{
-					windowSize_ = glm::vec2(event.window.data1, event.window.data2);
+					isOpen = false;
 				}
-			}
-			program_.OnEvent(event);
-		}
-	    // Start the Dear ImGui frame
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplSDL2_NewFrame(window_);
-		ImGui::NewFrame();
-		DrawImGui();
-		ImGui::Render();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		program_.Update(dt);
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-		SDL_GL_SwapWindow(window_);
-	}
 
-	Destroy();
+				if (event.type == SDL_WINDOWEVENT)
+				{
+					if (event.window.event == SDL_WINDOWEVENT_RESIZED)
+					{
+						windowSize_ = glm::vec2(event.window.data1, event.window.data2);
+					}
+				}
+				program_.OnEvent(event);
+			}
+			// Start the Dear ImGui frame
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplSDL2_NewFrame(window_);
+			ImGui::NewFrame();
+			DrawImGui();
+			ImGui::Render();
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			program_.Update(dt);
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+			SDL_GL_SwapWindow(window_);
+		}
+
+		Destroy();
+	} 
+	catch (std::exception& ex)
+	{
+		std::cerr << ex.what() << std::endl;
+	}
 }
 void Engine::Destroy()
 {
@@ -150,4 +150,5 @@ void Engine::DrawImGui()
 	ImGui::End();
 	program_.DrawImGui();
 }
-}
+
+} // End namespace gl.
