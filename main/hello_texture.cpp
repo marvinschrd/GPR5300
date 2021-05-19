@@ -128,9 +128,9 @@ namespace gl {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		IsError(__FILE__, __LINE__);
 
-		std::string path = "..\\";
+		std::string path = "../";
 		{
-			std::string jpg_file = path + "data\\textures\\texture_diffuse.jpg";
+			std::string jpg_file = path + "data/textures/texture_diffuse.jpg";
 			int width, height, nrChannels;
 			// stbi_set_flip_vertically_on_load(true);
 			unsigned char* dataDiffuse = stbi_load(
@@ -175,7 +175,7 @@ namespace gl {
 		}
 
 		{
-			std::string png_file = path + "data\\textures\\texture_smily.png";
+			std::string png_file = path + "data/textures/texture_smily.png";
 			int width, height, nrChannels;
 			// stbi_set_flip_vertically_on_load(true);
 			unsigned char* dataSmily = stbi_load(
@@ -220,9 +220,9 @@ namespace gl {
 		}
 
 		std::ifstream ifs_vert(
-			path + "data\\shaders\\hello_texture\\texture.vert");
+			path + "data/shaders/hello_texture/texture.vert");
 		std::ifstream ifs_frag(
-			path + "data\\shaders\\hello_texture\\texture.frag");
+			path + "data/shaders/hello_texture/texture.frag");
 
 		if (!ifs_vert.is_open())
 		{
