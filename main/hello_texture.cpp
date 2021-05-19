@@ -20,7 +20,8 @@ namespace gl {
 
 	protected:
 		unsigned int VBO_;
-		unsigned int VAO_;
+		unsigned int VAO_[2];
+		unsigned int EBO_;
 		unsigned int vertex_shader_;
 		unsigned int fragment_shader_;
 		unsigned int program_;
@@ -42,16 +43,37 @@ namespace gl {
 
 	void HelloTexture::Init()
 	{
-		std::array<float, 9> vertex_point = {
-			-0.5f, -0.5f, 0.0f,
-			 0.5f, -0.5f, 0.0f,
-			 0.0f,  0.5f, 0.0f
+		std::array<float, 24> vertices = {
+			-0.5f, -0.5f, 0.0f, 1.0, 0.0, 0.0,
+			 0.5f, -0.5f, 0.0f, 0.0, 1.0, 0.0,
+			-0.5f,  0.5f, 0.0f, 0.0, 0.0, 1.0,
+			 0.5f,  0.5f, 0.0f, 1.0, 0.0, 0.0
 		};
+
+		std::array<std::uint32_t, 6> indices{
+			0, 1, 2,
+			1, 2, 3
+		};
+
 		// VAO binding should be before VBO.
-		glGenVertexArrays(1, &VAO_);
+		glGenVertexArrays(2, VAO_);
 		IsError(__FILE__, __LINE__);
-		glBindVertexArray(VAO_);
+		glBindVertexArray(VAO_[0]);
 		IsError(__FILE__, __LINE__);
+		glBindVertexArray(VAO_[1]);
+
+		// EBO.
+		glGenBuffers(1, &EBO_);
+		IsError(__FILE__, __LINE__);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_);
+		IsError(__FILE__, __LINE__);
+		glBufferData(
+			GL_ELEMENT_ARRAY_BUFFER,
+			indices.size() * sizeof(float),
+			indices.data(),
+			GL_STATIC_DRAW);
+		IsError(__FILE__, __LINE__);
+
 		// VBO.
 		glGenBuffers(1, &VBO_);
 		IsError(__FILE__, __LINE__);
@@ -59,27 +81,39 @@ namespace gl {
 		IsError(__FILE__, __LINE__);
 		glBufferData(
 			GL_ARRAY_BUFFER,
-			sizeof(float) * vertex_point.size(),
-			vertex_point.data(),
+			vertices.size() * sizeof(float),
+			vertices.data(),
 			GL_STATIC_DRAW);
 		IsError(__FILE__, __LINE__);
+
+		GLintptr vertex_color_offset = 3 * sizeof(float);
 		glVertexAttribPointer(
 			0,
 			3,
 			GL_FLOAT,
 			GL_FALSE,
-			3 * sizeof(float),
+			6 * sizeof(float),
 			0);
 		IsError(__FILE__, __LINE__);
+		glVertexAttribPointer(
+			1,
+			3,
+			GL_FLOAT,
+			GL_FALSE,
+			6 * sizeof(float),
+			(GLvoid*)vertex_color_offset);
+		IsError(__FILE__, __LINE__);
 		glEnableVertexAttribArray(0);
+		IsError(__FILE__, __LINE__);
+		glEnableVertexAttribArray(1);
 		IsError(__FILE__, __LINE__);
 
 		std::string path = "..\\";
 
 		std::ifstream ifs_vert(
-			path + "data\\shaders\\hello_texture\\texture.vert");
+			path + "data\\shaders\\hello_triangle\\triangle.vert");
 		std::ifstream ifs_frag(
-			path + "data\\shaders\\hello_texture\\texture.frag");
+			path + "data\\shaders\\hello_triangle\\triangle.frag");
 
 		if (!ifs_vert.is_open())
 		{
@@ -90,16 +124,8 @@ namespace gl {
 			throw std::runtime_error("Could not open fragment file.");
 		}
 
-		std::string vertex_source
-		{ 
-			std::istreambuf_iterator<char>(ifs_vert), 
-			{} 
-		};
-		std::string fragment_source
-		{ 
-			std::istreambuf_iterator<char>(ifs_frag), 
-			{} 
-		};
+		std::string vertex_source{ std::istreambuf_iterator<char>(ifs_vert), {} };
+		std::string fragment_source{ std::istreambuf_iterator<char>(ifs_frag), {} };
 
 		// Vertex shader.
 		vertex_shader_ = glCreateShader(GL_VERTEX_SHADER);
@@ -159,9 +185,11 @@ namespace gl {
 		IsError(__FILE__, __LINE__);
 		glUseProgram(program_);
 		IsError(__FILE__, __LINE__);
-		glBindVertexArray(VAO_);
+		glBindVertexArray(VAO_[0]);
 		IsError(__FILE__, __LINE__);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glBindVertexArray(VAO_[1]);
+		IsError(__FILE__, __LINE__);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		IsError(__FILE__, __LINE__);
 	}
 
@@ -177,7 +205,7 @@ namespace gl {
 
 	void HelloTexture::OnEvent(SDL_Event& event)
 	{
-		if ((event.type == SDL_KEYDOWN) && 
+		if ((event.type == SDL_KEYDOWN) &&
 			(event.key.keysym.sym == SDLK_ESCAPE))
 		{
 			exit(0);

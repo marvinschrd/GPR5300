@@ -12,6 +12,7 @@ find_package(imgui CONFIG REQUIRED)
 set(OpenGL_GL_PREFERENCE GLVND)
 find_package(OpenGL REQUIRED)
 find_package(glad CONFIG REQUIRED)
+find_path(STB_INCLUDE_DIRS "stb.h")
 
 file(GLOB_RECURSE GLSL_SOURCE_FILES
 		"data/*.frag"
@@ -22,23 +23,6 @@ file(GLOB_RECURSE GLSL_SOURCE_FILES
 		"data/*.comp"
 		)
 source_group("Shader Files" FILES ${GLSL_SOURCE_FILES})
-foreach(GLSL ${GLSL_SOURCE_FILES})
-	get_filename_component(FILE_NAME ${GLSL} NAME)
-	get_filename_component(PATH_NAME ${GLSL} DIRECTORY)
-	get_filename_component(EXTENSION ${GLSL} EXT)
-	file(RELATIVE_PATH PATH_NAME "${CMAKE_SOURCE_DIR}" ${PATH_NAME})
-	#MESSAGE("GLSL PATH: ${PATH_NAME} NAME: ${FILE_NAME}")
-	set(GLSL_OUTPUT "${CMAKE_BINARY_DIR}/${PATH_NAME}/${FILE_NAME}")
-	add_custom_command(
-			OUTPUT ${GLSL_OUTPUT}
-			COMMAND ${GLSL_VALIDATOR} ${GLSL}
-			COMMAND ${CMAKE_COMMAND} -E copy 
-			${CMAKE_SOURCE_DIR}/${PATH_NAME}/${FILE_NAME} 
-			${GLSL_OUTPUT}
-
-			DEPENDS ${GLSL})
-	list(APPEND GLSL_OUTPUT_FILES ${GLSL_OUTPUT})
-endforeach(GLSL)
 
 add_custom_target(
 		ShadersCheck
@@ -53,6 +37,7 @@ target_link_libraries(CommonLib PUBLIC SDL2::SDL2 SDL2::SDL2main)
 target_link_libraries(CommonLib PUBLIC imgui::imgui)
 target_link_libraries(CommonLib PUBLIC glad::glad)
 target_link_libraries(CommonLib PUBLIC ${OPENGL_LIBRARIES})
+target_include_directories(CommonLib PUBLIC ${STB_INCLUDE_DIRS})
 
 file(GLOB_RECURSE main_files main/*.cpp)
 foreach(test_file ${main_files})
