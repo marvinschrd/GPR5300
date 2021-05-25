@@ -72,7 +72,7 @@ void Engine::Init()
 	//ImGui::StyleColorsDark();
 	ImGui::StyleColorsClassic();
 	ImGui_ImplSDL2_InitForOpenGL(window_, glRenderContext_);
-	ImGui_ImplOpenGL3_Init("#version 450 core");
+	ImGui_ImplOpenGL3_Init("#version 300 es");
 
 	program_.Init();
 }
@@ -117,6 +117,7 @@ void Engine::Run()
 			ImGui::NewFrame();
 			DrawImGui();
 			ImGui::Render();
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			program_.Update(dt);
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 			SDL_GL_SwapWindow(window_);
