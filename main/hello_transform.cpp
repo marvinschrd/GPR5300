@@ -38,7 +38,7 @@ namespace gl {
 		unsigned int vertex_shader_;
 		unsigned int fragment_shader_;
 		unsigned int program_;
-	
+
 		float time_ = 0.0f;
 		float delta_time_ = 0.0f;
 
@@ -149,6 +149,7 @@ namespace gl {
 		IsError(__FILE__, __LINE__);
 
 		std::string path = "../";
+
 		texture_diffuse_ = std::make_unique<Texture>(
 			path + "data/textures/texture_diffuse.jpg");
 		
@@ -220,7 +221,6 @@ namespace gl {
 	{
 		if (event.type == SDL_KEYDOWN)
 		{
-			
 			if (event.key.keysym.sym == SDLK_ESCAPE)
 				exit(0);
 			if (event.key.keysym.sym == SDLK_w)
