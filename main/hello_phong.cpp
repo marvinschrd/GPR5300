@@ -44,11 +44,13 @@ namespace gl {
 
 		std::unique_ptr<Camera> camera_ = nullptr;
 		std::unique_ptr<Texture> texture_diffuse_ = nullptr;
+		std::unique_ptr<Texture> texture_specular_ = nullptr;
 		std::unique_ptr<Shader> shaders_ = nullptr;
 
 		glm::mat4 model_ = glm::mat4(1.0f);
 		glm::mat4 view_ = glm::mat4(1.0f);
 		glm::mat4 projection_ = glm::mat4(1.0f);
+		glm::mat4 inv_model_ = glm::mat4(1.0f);
 	};
 
 	void HelloTransform::IsError(const std::string& file, int line) const
@@ -66,10 +68,10 @@ namespace gl {
 	void HelloTransform::Init()
 	{
 		std::array<float, 32> vertices = {
-			-0.5f, -0.5f, 0.0f, 1.0, 0.0, 0.0, 0.0, 0.0,
-			 0.5f, -0.5f, 0.0f, 0.0, 1.0, 0.0, 1.0, 0.0,
+			-0.5f, -0.5f, 0.0f, 0.0, 0.0, 1.0, 0.0, 0.0,
+			 0.5f, -0.5f, 0.0f, 0.0, 0.0, 1.0, 1.0, 0.0,
 			-0.5f,  0.5f, 0.0f, 0.0, 0.0, 1.0, 0.0, 1.0,
-			 0.5f,  0.5f, 0.0f, 1.0, 0.0, 0.0, 1.0, 1.0
+			 0.5f,  0.5f, 0.0f, 0.0, 0.0, 1.0, 1.0, 1.0
 		};
 
 		std::array<std::uint32_t, 6> indices{
@@ -150,17 +152,23 @@ namespace gl {
 		std::string path = "../";
 
 		texture_diffuse_ = std::make_unique<Texture>(
-			path + "data/textures/texture_diffuse.jpg");
+			path + "data/textures/WoodFloor043_1K_Color.jpg");
+		texture_specular_ = std::make_unique<Texture>(
+			path + "data/textures/WoodFloor043_1K_Roughness.jpg");
 		
 		shaders_ = std::make_unique<Shader>(
-			path + "data/shaders/hello_transform/transform.vert",
-			path + "data/shaders/hello_transform/transform.frag");
+			path + "data/shaders/hello_phong/phong.vert",
+			path + "data/shaders/hello_phong/phong.frag");
 
 		// Bind uniform to program.
 		shaders_->Use();
 		texture_diffuse_->Bind(0);
-		shaders_->SetInt("textureDiffuse", 0);
-	
+		shaders_->SetInt("Diffuse", 0);
+		// texture_diffuse_->UnBind();
+		texture_specular_->Bind(1);
+		shaders_->SetInt("Specular", 1);
+		// texture_specular_->UnBind();
+		
 		glClearColor(0.3f, 0.2f, 0.1f, 1.0f);
 		IsError(__FILE__, __LINE__);
 	}
@@ -168,6 +176,7 @@ namespace gl {
 	void HelloTransform::SetModelMatrix(seconds dt) 
 	{
 		model_ = glm::rotate(glm::mat4(1.0f), time_, glm::vec3(0.f, 1.f, 0.f));
+		inv_model_ = glm::transpose(glm::inverse(model_));
 	}
 
 	void HelloTransform::SetViewMatrix(seconds dt) 
@@ -190,6 +199,8 @@ namespace gl {
 		shaders_->SetMat4("model", model_);
 		shaders_->SetMat4("view", view_);
 		shaders_->SetMat4("projection", projection_);
+		shaders_->SetMat4("inv_model", inv_model_);
+		shaders_->SetVec3("camera_position", camera_->position);
 	}
 
 	void HelloTransform::Update(seconds dt)

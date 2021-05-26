@@ -14,21 +14,21 @@ namespace gl {
 		Texture(const std::string& file_name)
 		{
 			int width, height, nrChannels;
-			// stbi_set_flip_vertically_on_load(true);
-			unsigned char* dataDiffuse = stbi_load(
+			stbi_set_flip_vertically_on_load(true);
+			unsigned char* data = stbi_load(
 				file_name.c_str(),
 				&width,
 				&height,
 				&nrChannels,
 				0);
-			assert(dataDiffuse);
-
+			assert(data);
 			glGenTextures(1, &id);
 			IsError(__FILE__, __LINE__);
 			glBindTexture(GL_TEXTURE_2D, id);
 			IsError(__FILE__, __LINE__);
-			if (nrChannels == 3)
+			switch (nrChannels)
 			{
+			case 3:
 				glTexImage2D(
 					GL_TEXTURE_2D,
 					0,
@@ -38,11 +38,10 @@ namespace gl {
 					0,
 					GL_RGB,
 					GL_UNSIGNED_BYTE,
-					dataDiffuse);
+					data);
 				IsError(__FILE__, __LINE__);
-			}
-			if (nrChannels == 4)
-			{
+				break;
+			case 4:
 				glTexImage2D(
 					GL_TEXTURE_2D,
 					0,
@@ -52,9 +51,27 @@ namespace gl {
 					0,
 					GL_RGBA,
 					GL_UNSIGNED_BYTE,
-					dataDiffuse);
+					data);
 				IsError(__FILE__, __LINE__);
+				break;
+			case 1:
+				glTexImage2D(
+					GL_TEXTURE_2D,
+					0,
+					GL_RED,
+					width,
+					height,
+					0,
+					GL_RED,
+					GL_UNSIGNED_BYTE,
+					data);
+				IsError(__FILE__, __LINE__);
+				break;
+			default:
+				throw std::runtime_error(
+					"Unknown number of colors: " + std::to_string(nrChannels));
 			}
+			stbi_image_free(data);
 			glTexParameteri(
 				GL_TEXTURE_2D,
 				GL_TEXTURE_WRAP_S,
