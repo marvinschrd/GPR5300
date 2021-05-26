@@ -158,10 +158,7 @@ namespace gl {
 
 		// Bind uniform to program.
 		shaders_->Use();
-		glActiveTexture(GL_TEXTURE0);
-		IsError(__FILE__, __LINE__);
-		glBindTexture(GL_TEXTURE_2D, texture_diffuse_->id);
-		IsError(__FILE__, __LINE__);
+		texture_diffuse_->Bind(0);
 		shaders_->SetInt("textureDiffuse", 0);
 	
 		glClearColor(0.3f, 0.2f, 0.1f, 1.0f);

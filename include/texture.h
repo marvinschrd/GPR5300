@@ -74,6 +74,17 @@ namespace gl {
 			glBindTexture(GL_TEXTURE_2D, 0);
 			IsError(__FILE__, __LINE__);
 		}
+		void Bind(unsigned int i = 0)
+		{
+			glActiveTexture(GL_TEXTURE0 + i);
+			IsError(__FILE__, __LINE__);
+			glBindTexture(GL_TEXTURE_2D, id);
+			IsError(__FILE__, __LINE__);
+		}
+		void UnBind()
+		{
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 	protected:
 		void IsError(const char* file, int line) {
 			auto error_code = glGetError();
