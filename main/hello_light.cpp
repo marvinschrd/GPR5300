@@ -153,27 +153,27 @@ namespace gl {
 
 		texture_diffuse_ = std::make_unique<Texture>(
 			path + "data/textures/texture_diffuse.jpg");
-		
+
 		shaders_ = std::make_unique<Shader>(
-			path + "data/shaders/hello_transform/transform.vert",
-			path + "data/shaders/hello_transform/transform.frag");
+			path + "data/shaders/hello_light/lightShader.vert",
+			path + "data/shaders/hello_light/lightShader.frag");
 
 		// Bind uniform to program.
 		shaders_->Use();
 		texture_diffuse_->Bind(0);
 		shaders_->SetInt("textureDiffuse", 0);
-	
+
 		glClearColor(0.3f, 0.2f, 0.1f, 1.0f);
 		IsError(__FILE__, __LINE__);
 	}
 
-	void HelloTransform::SetModelMatrix(seconds dt) 
+	void HelloTransform::SetModelMatrix(seconds dt)
 	{
 		model_ = glm::rotate(glm::mat4(1.0f), time_, glm::vec3(0.f, 1.f, 0.f));
 		model_inverse_ = glm::transpose(glm::inverse(model_));
 	}
 
-	void HelloTransform::SetViewMatrix(seconds dt) 
+	void HelloTransform::SetViewMatrix(seconds dt)
 	{
 		view_ = camera_->GetViewMatrix();
 	}
@@ -213,7 +213,7 @@ namespace gl {
 
 	void HelloTransform::Destroy()
 	{
-		
+
 	}
 
 	void HelloTransform::OnEvent(SDL_Event& event)
